@@ -11,6 +11,7 @@ using static VRCFaceTracking.Core.Params.Expressions.UnifiedExpressions;
 namespace ALVRModule
 {
     using static FaceFb;
+    using static FacePico;
 
     public enum FaceFb
     {
@@ -87,6 +88,83 @@ namespace ALVRModule
         Face1FbMax = 63,
         Face2FbMax = 70,
     }
+
+    public enum FacePico
+    {
+        Pico_EyeLookDown_L = 0,
+        Pico_NoseSneer_L = 1,
+        Pico_EyeLookIn_L = 2,
+        Pico_BrowInnerUp = 3,
+        Pico_BrowDown_R = 4,
+        Pico_MouthClose = 5,
+        Pico_MouthLowerDown_R = 6,
+        Pico_JawOpen = 7,
+        Pico_MouthUpperUp_R = 8,
+        Pico_MouthShrugUpper = 9,
+        Pico_MouthFunnel = 10,
+        Pico_EyeLookIn_R = 11,
+        Pico_EyeLookDown_R = 12,
+        Pico_NoseSneer_R = 13,
+        Pico_MouthRollUpper = 14,
+        Pico_JawRight = 15,
+        Pico_BrowDown_L = 16,
+        Pico_MouthShrugLower = 17,
+        Pico_MouthRollLower = 18,
+        Pico_MouthSmile_L = 19,
+        Pico_MouthPress_L = 20,
+        Pico_MouthSmile_R = 21,
+        Pico_MouthPress_R = 22,
+        Pico_MouthDimple_R = 23,
+        Pico_MouthLeft = 24,
+        Pico_JawForward = 25,
+        Pico_EyeSquint_L = 26,
+        Pico_MouthFrown_L = 27,
+        Pico_EyeBlink_L = 28,
+        Pico_CheekSquint_L = 29,
+        Pico_BrowOuterUp_L = 30,
+        Pico_EyeLookUp_L = 31,
+        Pico_JawLeft = 32,
+        Pico_MouthStretch_L = 33,
+        Pico_MouthPucker = 34,
+        Pico_EyeLookUp_R = 35,
+        Pico_BrowOuterUp_R = 36,
+        Pico_CheekSquint_R = 37,
+        Pico_EyeBlink_R = 38,
+        Pico_MouthUpperUp_L = 39,
+        Pico_MouthFrown_R = 40,
+        Pico_EyeSquint_R = 41,
+        Pico_MouthStretch_R = 42,
+        Pico_CheekPuff = 43,
+        Pico_EyeLookOut_L = 44,
+        Pico_EyeLookOut_R = 45,
+        Pico_EyeWide_R = 46,
+        Pico_EyeWide_L = 47,
+        Pico_MouthRight = 48,
+        Pico_MouthDimple_L = 49,
+        Pico_MouthLowerDown_L = 50,
+        Pico_TongueOut = 51,
+        Pico_Viseme_PP = 52,
+        Pico_Viseme_CH = 53,
+        Pico_Viseme_o = 54,
+        Pico_Viseme_O = 55,
+        Pico_Viseme_I = 56,
+        Pico_Viseme_u = 57,
+        Pico_Viseme_RR = 58,
+        Pico_Viseme_XX = 59,
+        Pico_Viseme_aa = 60,
+        Pico_Viseme_i = 61,
+        Pico_Viseme_FF = 62,
+        Pico_Viseme_U = 63,
+        Pico_Viseme_TH = 64,
+        Pico_Viseme_kk = 65,
+        Pico_Viseme_SS = 66,
+        Pico_Viseme_e = 67,
+        Pico_Viseme_DD = 68,
+        Pico_Viseme_E = 69,
+        Pico_Viseme_nn = 70,
+        Pico_Viseme_sil = 71,
+        Pico_FaceMax = 72,
+    };
 
     public class ALVRModule : ExtTrackingModule
     {
@@ -180,6 +258,11 @@ namespace ALVRModule
         }
 
         static void SetParam(float[] data, FaceFb input, UnifiedExpressions outputType)
+        {
+            UnifiedTracking.Data.Shapes[(int)outputType].Weight = data[(int)input];
+        }
+
+        static void SetParam(float[] data, UnifiedExpressions outputType, FacePico input)
         {
             UnifiedTracking.Data.Shapes[(int)outputType].Weight = data[(int)input];
         }
@@ -292,6 +375,113 @@ namespace ALVRModule
             SetParam(p, TongueOutFb, TongueOut);
         }
 
+        private static void SetFacePicoParams(float[] p)
+        {
+            var expr = UnifiedTracking.Data.Shapes;
+
+            UnifiedTracking.Data.Eye.Right.Openness = 1.0f - Math.Clamp(p[(int)Pico_EyeBlink_R] + p[(int)Pico_EyeBlink_R] * p[(int)Pico_EyeSquint_R], 0.0f, 1.0f);
+            UnifiedTracking.Data.Eye.Left .Openness = 1.0f - Math.Clamp(p[(int)Pico_EyeBlink_L] + p[(int)Pico_EyeBlink_L] * p[(int)Pico_EyeSquint_L], 0.0f, 1.0f);
+
+            #region Eye Expressions
+
+            SetParam(p, EyeSquintRight, Pico_EyeSquint_R);
+            SetParam(p, EyeSquintLeft, Pico_EyeSquint_L);
+            SetParam(p, EyeWideRight, Pico_EyeWide_R);
+            SetParam(p, EyeWideLeft, Pico_EyeWide_L);
+
+            #endregion
+
+            #region Eyebrow Expressions
+
+            SetParam(p, BrowPinchRight, Pico_BrowDown_R);
+            SetParam(p, BrowPinchLeft, Pico_BrowDown_L);
+            SetParam(p, BrowLowererRight, Pico_BrowDown_R);
+            SetParam(p, BrowLowererLeft, Pico_BrowDown_L);
+            SetParam(p, BrowInnerUpRight, Pico_BrowInnerUp);
+            SetParam(p, BrowInnerUpLeft, Pico_BrowInnerUp);
+            SetParam(p, BrowOuterUpRight, Pico_BrowOuterUp_R);
+            SetParam(p, BrowOuterUpLeft, Pico_BrowOuterUp_L);
+
+            #endregion
+
+            #region Cheek Expressions
+
+            SetParam(p, CheekSquintRight, Pico_CheekSquint_R);
+            SetParam(p, CheekSquintLeft, Pico_CheekSquint_L);
+            SetParam(p, CheekPuffRight, Pico_CheekPuff);
+            SetParam(p, CheekPuffLeft, Pico_CheekPuff);
+
+            #endregion
+
+            #region Jaw Exclusive Expressions
+
+            SetParam(p, JawOpen, Pico_JawOpen);
+            SetParam(p, JawRight, Pico_JawRight);
+            SetParam(p, JawLeft, Pico_JawLeft);
+            SetParam(p, JawForward, Pico_JawForward);
+            SetParam(p, MouthClosed, Pico_MouthClose);
+
+            #endregion
+
+            #region Lip Expressions
+
+            SetParam(p, LipSuckUpperRight, Pico_MouthRollUpper);
+            SetParam(p, LipSuckUpperLeft, Pico_MouthRollUpper);
+            SetParam(p, LipSuckLowerRight, Pico_MouthRollLower);
+            SetParam(p, LipSuckLowerLeft, Pico_MouthRollLower);
+
+            SetParam(p, LipFunnelUpperRight, Pico_MouthFunnel);
+            SetParam(p, LipFunnelUpperLeft, Pico_MouthFunnel);
+            SetParam(p, LipFunnelLowerRight, Pico_MouthFunnel);
+            SetParam(p, LipFunnelLowerLeft, Pico_MouthFunnel);
+
+            SetParam(p, LipPuckerUpperRight, Pico_MouthPucker);
+            SetParam(p, LipPuckerUpperLeft, Pico_MouthPucker);
+            SetParam(p, LipPuckerLowerRight, Pico_MouthPucker);
+            SetParam(p, LipPuckerLowerLeft, Pico_MouthPucker);
+
+            expr[(int)MouthUpperUpRight]    .Weight = Math.Max(0, p[(int)Pico_MouthUpperUp_R] - p[(int)Pico_NoseSneer_R]);
+            expr[(int)MouthUpperUpLeft]     .Weight = Math.Max(0, p[(int)Pico_MouthUpperUp_L] - p[(int)Pico_NoseSneer_L]);
+            expr[(int)MouthUpperDeepenRight].Weight = Math.Max(0, p[(int)Pico_MouthUpperUp_R] - p[(int)Pico_NoseSneer_R]);
+            expr[(int)MouthUpperDeepenLeft] .Weight = Math.Max(0, p[(int)Pico_MouthUpperUp_L] - p[(int)Pico_NoseSneer_L]);
+            SetParam(p, NoseSneerRight, Pico_NoseSneer_R);
+            SetParam(p, NoseSneerLeft, Pico_NoseSneer_L);
+
+            SetParam(p, MouthLowerDownRight, Pico_MouthLowerDown_R);
+            SetParam(p, MouthLowerDownLeft, Pico_MouthLowerDown_L);
+
+            SetParam(p, MouthUpperRight, Pico_MouthRight);
+            SetParam(p, MouthUpperLeft, Pico_MouthLeft);
+            SetParam(p, MouthLowerRight, Pico_MouthRight);
+            SetParam(p, MouthLowerLeft, Pico_MouthLeft);
+
+            SetParam(p, MouthCornerPullRight, Pico_MouthSmile_R);
+            SetParam(p, MouthCornerPullLeft, Pico_MouthSmile_L);
+            SetParam(p, MouthCornerSlantRight, Pico_MouthSmile_R);
+            SetParam(p, MouthCornerSlantLeft, Pico_MouthSmile_L);
+
+            SetParam(p, MouthFrownRight, Pico_MouthFrown_R);
+            SetParam(p, MouthFrownLeft, Pico_MouthFrown_L);
+            SetParam(p, MouthStretchRight, Pico_MouthStretch_R);
+            SetParam(p, MouthStretchLeft, Pico_MouthStretch_L);
+
+            SetParam(p, MouthDimpleRight, Pico_MouthDimple_R);
+            SetParam(p, MouthDimpleLeft, Pico_MouthDimple_L);
+
+            SetParam(p, MouthRaiserUpper, Pico_MouthShrugUpper);
+            SetParam(p, MouthRaiserLower, Pico_MouthShrugLower);
+            SetParam(p, MouthPressRight, Pico_MouthPress_R);
+            SetParam(p, MouthPressLeft, Pico_MouthPress_L);
+
+            #endregion
+
+            #region Tongue Expressions
+
+            SetParam(p, TongueOut, Pico_TongueOut);
+
+            #endregion
+        }
+
         public override void Update()
         {
             byte[] packet;
@@ -324,6 +514,9 @@ namespace ALVRModule
                         break;
                     case "Face2Fb\0":
                         SetFace2FbParams(GetParams(packet, ref cursor, (int)Face2FbMax));
+                        break;
+                    case "FacePico":
+                        SetFacePicoParams(GetParams(packet, ref cursor, (int)Pico_FaceMax));
                         break;
                     default:
                         Logger.LogError($"[ALVR Module] Unrecognized prefix: {str}");
