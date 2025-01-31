@@ -3,16 +3,26 @@ using System.Net.Sockets;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using VRCFaceTracking;
+using VRCFaceTracking.Core.Params.Data;
 
 namespace ALVRModule
 {
     public class ALVRModule : ExtTrackingModule
     {
-        const int PORT = 0xA1F7;
-        const int PREFIX_SIZE = 8;
+        private delegate void ParamsConsumer(FloatParams p, FloatWeightParams w, UnifiedEyeData eye);
 
-        readonly UdpClient socket = new(PORT);
-        readonly BaseFaceTracking[] knownTrackings = { new EyesFaceTracking(), new MetaFaceTracking(), new PicoFaceTracking() };
+        private const int Port = 0xA1F7;
+        private const int PrefixSize = 8;
+
+        private readonly UdpClient Socket = new(Port);
+        private readonly Dictionary<string, ParamsConsumer> Consumers = new()
+        {
+            ["EyesQuat"] = EyeTracking.SetEyesQuatParams,
+            ["CombQuat"] = EyeTracking.SetCombEyesQuatParams,
+            ["FaceFb\0\0"] = MetaFaceTracking.SetFace1FbParams,
+            ["Face2Fb\0"] = MetaFaceTracking.SetFace2FbParams,
+            ["FacePico"] = PicoFaceTracking.SetFacePicoParams,
+        };
 
         public override (bool SupportsEye, bool SupportsExpression) Supported => (true, true);
 
@@ -23,7 +33,7 @@ namespace ALVRModule
             var stream = GetType().Assembly.GetManifestResourceStream("ALVRModule.Assets.alvr.png");
             ModuleInformation.StaticImages = stream != null ? new List<Stream> { stream } : ModuleInformation.StaticImages;
 
-            socket.Client.ReceiveTimeout = 100;
+            Socket.Client.ReceiveTimeout = 100;
 
             return (true, true);
         }
@@ -31,44 +41,39 @@ namespace ALVRModule
         public override void Update()
         {
             byte[] packet;
+
             try
             {
-                var peer = new IPEndPoint(IPAddress.Any, PORT);
-                packet = socket.Receive(ref peer);
+                IPEndPoint from = new(IPAddress.Any, 0);
+                packet = Socket.Receive(ref from);
             }
             catch (Exception)
             {
                 return;
             }
 
-            int cursor = 0;
-            while (cursor < packet.Length)
+            using MemoryStream stream = new(packet);
+            FloatParams p = new(stream);
+
+            while (stream.Length - stream.Position >= PrefixSize)
             {
-                string prefix = Encoding.ASCII.GetString(packet[cursor..(cursor + PREFIX_SIZE)], 0, PREFIX_SIZE);
-                cursor += PREFIX_SIZE;
+                byte[] prefixBytes = new byte[PrefixSize];
+                stream.ReadAtLeast(prefixBytes, PrefixSize);
+                string prefix = Encoding.ASCII.GetString(prefixBytes);
 
-                bool consumed = false;
-
-                foreach (var item in knownTrackings)
+                if (Consumers.TryGetValue(prefix, out var consumer) && consumer != null)
                 {
-                    consumed |= item.ConsumePacket(packet, ref cursor, prefix);
-
-                    if (consumed)
-                    {
-                        break;
-                    }
+                    consumer(p, FloatWeightParams.Instance, UnifiedTracking.Data.Eye);
+                    continue;
                 }
 
-                if (!consumed)
-                {
-                    Logger.LogError($"[ALVR Module] Unrecognized prefix: {prefix}");
-                }
+                Logger.LogError("[ALVR Module] Unrecognized prefix: {}", prefix);
             }
         }
 
         public override void Teardown()
         {
-            socket.Close();
+            Socket.Close();
         }
     }
 }

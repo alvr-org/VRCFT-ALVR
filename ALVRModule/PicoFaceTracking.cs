@@ -1,6 +1,5 @@
-﻿using VRCFaceTracking;
-using VRCFaceTracking.Core.Params.Expressions;
-using static VRCFaceTracking.Core.Params.Expressions.UnifiedExpressions;
+﻿using static VRCFaceTracking.Core.Params.Expressions.UnifiedExpressions;
+using VRCFaceTracking.Core.Params.Data;
 
 namespace ALVRModule
 {
@@ -83,130 +82,114 @@ namespace ALVRModule
         FaceMax = 72,
     };
 
-    public class PicoFaceTracking : BaseFaceTracking
+    public class PicoFaceTracking
     {
-        private static void SetParam(float[] data, UnifiedExpressions outputType, FacePico input)
+        public static void SetFacePicoParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            UnifiedTracking.Data.Shapes[(int)outputType].Weight = data[(int)input];
-        }
+            p.Read((int)FaceMax);
 
-        private static void SetFacePicoParams(float[] p)
-        {
-            var expr = UnifiedTracking.Data.Shapes;
-
-            UnifiedTracking.Data.Eye.Right.Openness = 1.0f - Math.Clamp(p[(int)EyeBlinkR] + p[(int)EyeBlinkR] * p[(int)EyeSquintR], 0.0f, 1.0f);
-            UnifiedTracking.Data.Eye.Left.Openness = 1.0f - Math.Clamp(p[(int)EyeBlinkL] + p[(int)EyeBlinkL] * p[(int)EyeSquintL], 0.0f, 1.0f);
+            eye.Right.Openness = 1.0f - Math.Clamp(p[EyeBlinkR] + p[EyeBlinkR] * p[EyeSquintR], 0.0f, 1.0f);
+            eye.Left.Openness = 1.0f - Math.Clamp(p[EyeBlinkL] + p[EyeBlinkL] * p[EyeSquintL], 0.0f, 1.0f);
 
             #region Eye Expressions
 
-            SetParam(p, EyeSquintRight, EyeSquintR);
-            SetParam(p, EyeSquintLeft, EyeSquintL);
-            SetParam(p, EyeWideRight, EyeWideR);
-            SetParam(p, EyeWideLeft, EyeWideL);
+            w[EyeSquintRight] = p[EyeSquintR];
+            w[EyeSquintLeft] = p[EyeSquintL];
+            w[EyeWideRight] = p[EyeWideR];
+            w[EyeWideLeft] = p[EyeWideL];
 
             #endregion
 
             #region Eyebrow Expressions
 
-            SetParam(p, BrowPinchRight, BrowDownR);
-            SetParam(p, BrowPinchLeft, BrowDownL);
-            SetParam(p, BrowLowererRight, BrowDownR);
-            SetParam(p, BrowLowererLeft, BrowDownL);
-            SetParam(p, BrowInnerUpRight, BrowInnerUp);
-            SetParam(p, BrowInnerUpLeft, BrowInnerUp);
-            SetParam(p, BrowOuterUpRight, BrowOuterUpR);
-            SetParam(p, BrowOuterUpLeft, BrowOuterUpL);
+            w[BrowPinchRight] = p[BrowDownR];
+            w[BrowPinchLeft] = p[BrowDownL];
+            w[BrowLowererRight] = p[BrowDownR];
+            w[BrowLowererLeft] = p[BrowDownL];
+            w[BrowInnerUpRight] = p[BrowInnerUp];
+            w[BrowInnerUpLeft] = p[BrowInnerUp];
+            w[BrowOuterUpRight] = p[BrowOuterUpR];
+            w[BrowOuterUpLeft] = p[BrowOuterUpL];
 
             #endregion
 
             #region Cheek Expressions
 
-            SetParam(p, CheekSquintRight, CheekSquintR);
-            SetParam(p, CheekSquintLeft, CheekSquintL);
-            SetParam(p, CheekPuffRight, CheekPuff);
-            SetParam(p, CheekPuffLeft, CheekPuff);
+            w[CheekSquintRight] = p[CheekSquintR];
+            w[CheekSquintLeft] = p[CheekSquintL];
+            w[CheekPuffRight] = p[CheekPuff];
+            w[CheekPuffLeft] = p[CheekPuff];
 
             #endregion
 
             #region Jaw Exclusive Expressions
 
-            SetParam(p, JawOpen, JawShapeOpen);
-            SetParam(p, JawRight, JawShapeRight);
-            SetParam(p, JawLeft, JawShapeLeft);
-            SetParam(p, JawForward, JawShapeForward);
-            SetParam(p, MouthClosed, MouthClose);
+            w[JawOpen] = p[JawShapeOpen];
+            w[JawRight] = p[JawShapeRight];
+            w[JawLeft] = p[JawShapeLeft];
+            w[JawForward] = p[JawShapeForward];
+            w[MouthClosed] = p[MouthClose];
 
             #endregion
 
             #region Lip Expressions
 
-            SetParam(p, LipSuckUpperRight, MouthRollUpper);
-            SetParam(p, LipSuckUpperLeft, MouthRollUpper);
-            SetParam(p, LipSuckLowerRight, MouthRollLower);
-            SetParam(p, LipSuckLowerLeft, MouthRollLower);
+            w[LipSuckUpperRight] = p[MouthRollUpper];
+            w[LipSuckUpperLeft] = p[MouthRollUpper];
+            w[LipSuckLowerRight] = p[MouthRollLower];
+            w[LipSuckLowerLeft] = p[MouthRollLower];
 
-            SetParam(p, LipFunnelUpperRight, MouthFunnel);
-            SetParam(p, LipFunnelUpperLeft, MouthFunnel);
-            SetParam(p, LipFunnelLowerRight, MouthFunnel);
-            SetParam(p, LipFunnelLowerLeft, MouthFunnel);
+            w[LipFunnelUpperRight] = p[MouthFunnel];
+            w[LipFunnelUpperLeft] = p[MouthFunnel];
+            w[LipFunnelLowerRight] = p[MouthFunnel];
+            w[LipFunnelLowerLeft] = p[MouthFunnel];
 
-            SetParam(p, LipPuckerUpperRight, MouthPucker);
-            SetParam(p, LipPuckerUpperLeft, MouthPucker);
-            SetParam(p, LipPuckerLowerRight, MouthPucker);
-            SetParam(p, LipPuckerLowerLeft, MouthPucker);
+            w[LipPuckerUpperRight] = p[MouthPucker];
+            w[LipPuckerUpperLeft] = p[MouthPucker];
+            w[LipPuckerLowerRight] = p[MouthPucker];
+            w[LipPuckerLowerLeft] = p[MouthPucker];
 
-            expr[(int)MouthUpperUpRight].Weight = Math.Max(0, p[(int)MouthUpperUpR] - p[(int)NoseSneerR]);
-            expr[(int)MouthUpperUpLeft].Weight = Math.Max(0, p[(int)MouthUpperUpL] - p[(int)NoseSneerL]);
-            expr[(int)MouthUpperDeepenRight].Weight = Math.Max(0, p[(int)MouthUpperUpR] - p[(int)NoseSneerR]);
-            expr[(int)MouthUpperDeepenLeft].Weight = Math.Max(0, p[(int)MouthUpperUpL] - p[(int)NoseSneerL]);
-            SetParam(p, NoseSneerRight, NoseSneerR);
-            SetParam(p, NoseSneerLeft, NoseSneerL);
+            w[MouthUpperUpRight] = Math.Max(0, p[MouthUpperUpR] - p[NoseSneerR]);
+            w[MouthUpperUpLeft] = Math.Max(0, p[MouthUpperUpL] - p[NoseSneerL]);
+            w[MouthUpperDeepenRight] = Math.Max(0, p[MouthUpperUpR] - p[NoseSneerR]);
+            w[MouthUpperDeepenLeft] = Math.Max(0, p[MouthUpperUpL] - p[NoseSneerL]);
 
-            SetParam(p, MouthLowerDownRight, MouthLowerDownR);
-            SetParam(p, MouthLowerDownLeft, MouthLowerDownL);
+            w[NoseSneerRight] = p[NoseSneerR];
+            w[NoseSneerLeft] = p[NoseSneerL];
 
-            SetParam(p, MouthUpperRight, MouthRight);
-            SetParam(p, MouthUpperLeft, MouthLeft);
-            SetParam(p, MouthLowerRight, MouthRight);
-            SetParam(p, MouthLowerLeft, MouthLeft);
+            w[MouthLowerDownRight] = p[MouthLowerDownR];
+            w[MouthLowerDownLeft] = p[MouthLowerDownL];
 
-            SetParam(p, MouthCornerPullRight, MouthSmileR);
-            SetParam(p, MouthCornerPullLeft, MouthSmileL);
-            SetParam(p, MouthCornerSlantRight, MouthSmileR);
-            SetParam(p, MouthCornerSlantLeft, MouthSmileL);
+            w[MouthUpperRight] = p[MouthRight];
+            w[MouthUpperLeft] = p[MouthLeft];
+            w[MouthLowerRight] = p[MouthRight];
+            w[MouthLowerLeft] = p[MouthLeft];
 
-            SetParam(p, MouthFrownRight, MouthFrownR);
-            SetParam(p, MouthFrownLeft, MouthFrownL);
-            SetParam(p, MouthStretchRight, MouthStretchR);
-            SetParam(p, MouthStretchLeft, MouthStretchL);
+            w[MouthCornerPullRight] = p[MouthSmileR];
+            w[MouthCornerPullLeft] = p[MouthSmileL];
+            w[MouthCornerSlantRight] = p[MouthSmileR];
+            w[MouthCornerSlantLeft] = p[MouthSmileL];
 
-            SetParam(p, MouthDimpleRight, MouthDimpleR);
-            SetParam(p, MouthDimpleLeft, MouthDimpleL);
+            w[MouthFrownRight] = p[MouthFrownR];
+            w[MouthFrownLeft] = p[MouthFrownL];
+            w[MouthStretchRight] = p[MouthStretchR];
+            w[MouthStretchLeft] = p[MouthStretchL];
 
-            SetParam(p, MouthRaiserUpper, MouthShrugUpper);
-            SetParam(p, MouthRaiserLower, MouthShrugLower);
-            SetParam(p, MouthPressRight, MouthPressR);
-            SetParam(p, MouthPressLeft, MouthPressL);
+            w[MouthDimpleRight] = p[MouthDimpleR];
+            w[MouthDimpleLeft] = p[MouthDimpleL];
+
+            w[MouthRaiserUpper] = p[MouthShrugUpper];
+            w[MouthRaiserLower] = p[MouthShrugLower];
+            w[MouthPressRight] = p[MouthPressR];
+            w[MouthPressLeft] = p[MouthPressL];
 
             #endregion
 
             #region Tongue Expressions
 
-            SetParam(p, TongueOut, TongueShapeOut);
+            w[TongueOut] = p[TongueShapeOut];
 
             #endregion
-        }
-
-        public override bool ConsumePacket(byte[] packet, ref int cursor, string prefix)
-        {
-            switch (prefix)
-            {
-                case "FacePico":
-                    SetFacePicoParams(GetParams(packet, ref cursor, (int)FaceMax));
-                    return true;
-                default:
-                    return false;
-            }
         }
     }
 }

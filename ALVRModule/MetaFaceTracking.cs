@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using VRCFaceTracking;
-using VRCFaceTracking.Core.Params.Expressions;
-using static VRCFaceTracking.Core.Params.Expressions.UnifiedExpressions;
+﻿using static VRCFaceTracking.Core.Params.Expressions.UnifiedExpressions;
+using VRCFaceTracking.Core.Params.Data;
 
 namespace ALVRModule
 {
@@ -83,134 +81,143 @@ namespace ALVRModule
         Face2FbMax = 70,
     }
 
-    public class MetaFaceTracking : BaseFaceTracking
+    public class MetaFaceTracking
     {
-        private static void SetParam(float[] data, FaceFb input, UnifiedExpressions outputType)
+        private static void SetFaceFbParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            UnifiedTracking.Data.Shapes[(int)outputType].Weight = data[(int)input];
+            eye.Right.Openness = 1.0f - Math.Max(0, Math.Min(1, p[EyesClosedR] + p[EyesClosedR] * p[LidTightenerR]));
+            eye.Left.Openness = 1.0f - Math.Max(0, Math.Min(1, p[EyesClosedL] + p[EyesClosedL] * p[LidTightenerL]));
+
+            #region Eyelids
+
+            w[EyeSquintRight] = p[LidTightenerR];
+            w[EyeSquintLeft] = p[LidTightenerL];
+            w[EyeWideRight] = p[UpperLidRaiserR];
+            w[EyeWideLeft] = p[UpperLidRaiserL];
+
+            #endregion
+
+            #region Eyebrows
+
+            w[BrowPinchRight] = p[BrowLowererR];
+            w[BrowPinchLeft] = p[BrowLowererL];
+            w[BrowLowererRight] = p[BrowLowererR];
+            w[BrowLowererLeft] = p[BrowLowererL];
+            w[BrowInnerUpRight] = p[InnerBrowRaiserR];
+            w[BrowInnerUpLeft] = p[InnerBrowRaiserL];
+            w[BrowOuterUpRight] = p[OuterBrowRaiserR];
+            w[BrowOuterUpLeft] = p[OuterBrowRaiserL];
+
+            #endregion
+
+            #region Cheeks
+
+            w[CheekSquintRight] = p[CheekRaiserR];
+            w[CheekSquintLeft] = p[CheekRaiserL];
+            w[CheekPuffRight] = p[CheekPuffR];
+            w[CheekPuffLeft] = p[CheekPuffL];
+            w[CheekSuckRight] = p[CheekSuckR];
+            w[CheekSuckLeft] = p[CheekSuckL];
+
+            #endregion
+
+            #region Jaw
+
+            w[JawOpen] = p[JawDrop];
+            w[JawRight] = p[JawSidewaysRight];
+            w[JawLeft] = p[JawSidewaysLeft];
+            w[JawForward] = p[JawThrust];
+            w[MouthClosed] = p[LipsToward];
+
+            #endregion
+
+            #region Lip push/pull
+
+            w[LipSuckUpperRight] = Math.Min(1f - (float)Math.Pow(p[UpperLipRaiserR], 1d / 6d), p[LipSuckRT]);
+            w[LipSuckUpperLeft] = Math.Min(1f - (float)Math.Pow(p[UpperLipRaiserL], 1d / 6d), p[LipSuckLT]);
+            w[LipSuckLowerRight] = p[LipSuckRB];
+            w[LipSuckLowerLeft] = p[LipSuckLB];
+            w[LipFunnelUpperRight] = p[LipFunnelerRT];
+            w[LipFunnelUpperLeft] = p[LipFunnelerLT];
+            w[LipFunnelLowerRight] = p[LipFunnelerRB];
+            w[LipFunnelLowerLeft] = p[LipFunnelerLB];
+            w[LipPuckerUpperRight] = p[LipPuckerR];
+            w[LipPuckerUpperLeft] = p[LipPuckerL];
+            w[LipPuckerLowerRight] = p[LipPuckerR];
+            w[LipPuckerLowerLeft] = p[LipPuckerL];
+
+            #endregion
+
+            #region Upper lip raiser
+
+            w[MouthUpperUpRight] = Math.Max(0, p[UpperLipRaiserR] - p[NoseWrinklerR]);
+            w[MouthUpperUpLeft] = Math.Max(0, p[UpperLipRaiserL] - p[NoseWrinklerL]);
+            w[MouthUpperDeepenRight] = Math.Max(0, p[UpperLipRaiserR] - p[NoseWrinklerR]);
+            w[MouthUpperDeepenLeft] = Math.Max(0, p[UpperLipRaiserL] - p[NoseWrinklerL]);
+            w[NoseSneerRight] = p[NoseWrinklerR];
+            w[NoseSneerLeft] = p[NoseWrinklerL];
+
+            #endregion
+
+            #region Lower lip depressor
+
+            w[MouthLowerDownRight] = p[LowerLipDepressorR];
+            w[MouthLowerDownLeft] = p[LowerLipDepressorL];
+
+            #endregion
+
+            #region Mouth direction
+
+            w[MouthUpperRight] = p[MouthRight];
+            w[MouthUpperLeft] = p[MouthLeft];
+            w[MouthLowerRight] = p[MouthRight];
+            w[MouthLowerLeft] = p[MouthLeft];
+
+            #endregion
+
+            #region Smile
+
+            w[MouthCornerPullRight] = p[LipCornerPullerR];
+            w[MouthCornerPullLeft] = p[LipCornerPullerL];
+            w[MouthCornerSlantRight] = p[LipCornerPullerR];
+            w[MouthCornerSlantLeft] = p[LipCornerPullerL];
+
+            #endregion
+
+            #region Frown
+
+            w[MouthFrownRight] = p[LipCornerDepressorR];
+            w[MouthFrownLeft] = p[LipCornerDepressorL];
+            w[MouthStretchRight] = p[LipStretcherR];
+            w[MouthStretchLeft] = p[LipStretcherL];
+
+            w[MouthDimpleLeft] = p[DimplerL];
+            w[MouthDimpleRight] = p[DimplerR];
+
+            w[MouthRaiserUpper] = p[ChinRaiserT];
+            w[MouthRaiserLower] = p[ChinRaiserB];
+            w[MouthPressRight] = p[LipPressorR];
+            w[MouthPressLeft] = p[LipPressorL];
+            w[MouthTightenerRight] = p[LipTightenerR];
+            w[MouthTightenerLeft] = p[LipTightenerL];
+
+            #endregion
         }
 
-        private static void SetFace1FbParams(float[] p)
+        public static void SetFace1FbParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            // Debug.Assert(p.Length == (int)Face1FbMax);
+            p.Read((int)Face1FbMax);
 
-            var eye = UnifiedTracking.Data.Eye;
-            var expr = UnifiedTracking.Data.Shapes;
-
-            eye.Left.Openness = 1.0f - (float)Math.Max(0, Math.Min(1, p[(int)EyesClosedL] + p[(int)EyesClosedL] * p[(int)LidTightenerL]));
-            eye.Right.Openness = 1.0f - (float)Math.Max(0, Math.Min(1, p[(int)EyesClosedR] + p[(int)EyesClosedR] * p[(int)LidTightenerR]));
-
-
-            // Eyelids
-            SetParam(p, LidTightenerR, EyeSquintRight);
-            SetParam(p, LidTightenerL, EyeSquintLeft);
-            SetParam(p, UpperLidRaiserR, EyeWideRight);
-            SetParam(p, UpperLidRaiserL, EyeWideLeft);
-
-            // Eyebrows
-            SetParam(p, BrowLowererR, BrowPinchRight);
-            SetParam(p, BrowLowererL, BrowPinchLeft);
-            SetParam(p, BrowLowererR, BrowLowererRight);
-            SetParam(p, BrowLowererL, BrowLowererLeft);
-            SetParam(p, InnerBrowRaiserR, BrowInnerUpRight);
-            SetParam(p, InnerBrowRaiserL, BrowInnerUpLeft);
-            SetParam(p, OuterBrowRaiserR, BrowOuterUpRight);
-            SetParam(p, OuterBrowRaiserL, BrowOuterUpLeft);
-
-            // Cheeks
-            SetParam(p, CheekRaiserR, CheekSquintRight);
-            SetParam(p, CheekRaiserL, CheekSquintLeft);
-            SetParam(p, CheekPuffR, CheekPuffRight);
-            SetParam(p, CheekPuffL, CheekPuffLeft);
-            SetParam(p, CheekSuckR, CheekSuckRight);
-            SetParam(p, CheekSuckL, CheekSuckLeft);
-
-            // Jaw
-            SetParam(p, JawDrop, JawOpen);
-            SetParam(p, JawSidewaysRight, JawRight);
-            SetParam(p, JawSidewaysLeft, JawLeft);
-            SetParam(p, JawThrust, JawForward);
-            SetParam(p, LipsToward, MouthClosed);
-
-            //Lip push/pull
-            expr[(int)LipSuckUpperRight].Weight =
-                Math.Min(1f - (float)Math.Pow(p[(int)UpperLipRaiserR], 1f / 6f), p[(int)LipSuckRT]);
-            expr[(int)LipSuckUpperLeft].Weight =
-                Math.Min(1f - (float)Math.Pow(p[(int)UpperLipRaiserL], 1f / 6f), p[(int)LipSuckLT]);
-            SetParam(p, LipSuckRB, LipSuckLowerRight);
-            SetParam(p, LipSuckLB, LipSuckLowerLeft);
-            SetParam(p, LipFunnelerRT, LipFunnelUpperRight);
-            SetParam(p, LipFunnelerLT, LipFunnelUpperLeft);
-            SetParam(p, LipFunnelerRB, LipFunnelLowerRight);
-            SetParam(p, LipFunnelerLB, LipFunnelLowerLeft);
-            SetParam(p, LipPuckerR, LipPuckerUpperRight);
-            SetParam(p, LipPuckerL, LipPuckerUpperLeft);
-            SetParam(p, LipPuckerR, LipPuckerLowerRight);
-            SetParam(p, LipPuckerL, LipPuckerLowerLeft);
-
-            // Upper lip raiser
-            expr[(int)MouthUpperUpRight].Weight = Math.Max(0, p[(int)UpperLipRaiserR] - p[(int)NoseWrinklerR]);
-            expr[(int)MouthUpperUpLeft].Weight = Math.Max(0, p[(int)UpperLipRaiserL] - p[(int)NoseWrinklerL]);
-            expr[(int)MouthUpperDeepenRight].Weight = Math.Max(0, p[(int)UpperLipRaiserR] - p[(int)NoseWrinklerR]);
-            expr[(int)MouthUpperDeepenLeft].Weight = Math.Max(0, p[(int)UpperLipRaiserL] - p[(int)NoseWrinklerL]);
-            SetParam(p, NoseWrinklerR, NoseSneerRight);
-            SetParam(p, NoseWrinklerL, NoseSneerLeft);
-
-            // Lower lip depressor
-            SetParam(p, LowerLipDepressorR, MouthLowerDownRight);
-            SetParam(p, LowerLipDepressorL, MouthLowerDownLeft);
-
-            // Mouth direction
-            SetParam(p, MouthRight, MouthUpperRight);
-            SetParam(p, MouthLeft, MouthUpperLeft);
-            SetParam(p, MouthRight, MouthLowerRight);
-            SetParam(p, MouthLeft, MouthLowerLeft);
-
-            // Smile
-            SetParam(p, LipCornerPullerR, MouthCornerPullRight);
-            SetParam(p, LipCornerPullerL, MouthCornerPullLeft);
-            SetParam(p, LipCornerPullerR, MouthCornerSlantRight);
-            SetParam(p, LipCornerPullerL, MouthCornerSlantLeft);
-
-            // Frown
-            SetParam(p, LipCornerDepressorR, MouthFrownRight);
-            SetParam(p, LipCornerDepressorL, MouthFrownLeft);
-            SetParam(p, LipStretcherR, MouthStretchRight);
-            SetParam(p, LipStretcherL, MouthStretchLeft);
-
-            SetParam(p, DimplerL, MouthDimpleLeft);
-            SetParam(p, DimplerR, MouthDimpleRight);
-
-            SetParam(p, ChinRaiserT, MouthRaiserUpper);
-            SetParam(p, ChinRaiserB, MouthRaiserLower);
-            SetParam(p, LipPressorR, MouthPressRight);
-            SetParam(p, LipPressorL, MouthPressLeft);
-            SetParam(p, LipTightenerR, MouthTightenerRight);
-            SetParam(p, LipTightenerL, MouthTightenerLeft);
+            SetFaceFbParams(p, w, eye);
         }
 
-        private static void SetFace2FbParams(float[] p)
+        public static void SetFace2FbParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            Debug.Assert(p.Length == (int)Face2FbMax);
+            p.Read((int)Face2FbMax);
 
-            SetFace1FbParams(p);
+            SetFaceFbParams(p, w, eye);
 
-            SetParam(p, TongueOutFb, TongueOut);
-        }
-
-        public override bool ConsumePacket(byte[] packet, ref int cursor, string prefix)
-        {
-            switch (prefix)
-            {
-                case "FaceFb\0\0":
-                    SetFace1FbParams(GetParams(packet, ref cursor, (int)Face1FbMax));
-                    return true;
-                case "Face2Fb\0":
-                    SetFace2FbParams(GetParams(packet, ref cursor, (int)Face2FbMax));
-                    return true;
-                default:
-                    return false;
-            }
+            w[TongueOut] = p[TongueOutFb];
         }
     }
 }
