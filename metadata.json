@@ -12,5 +12,5 @@
     "Ratings": 0,
     "RatingSum": 0,
     "UsageInstructions": "Set `Eye and face tracking` to `VRCFaceTracking`. Reconnect the client if necessary.",
-    "Version": "1.2.0"
+    "Version": "1.3.0"
 }
