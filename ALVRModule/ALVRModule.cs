@@ -19,9 +19,11 @@ namespace ALVRModule
         {
             ["EyesQuat"] = EyeTracking.SetEyesQuatParams,
             ["CombQuat"] = EyeTracking.SetCombEyesQuatParams,
-            ["FaceFb\0\0"] = MetaFaceTracking.SetFace1FbParams,
-            ["Face2Fb\0"] = MetaFaceTracking.SetFace2FbParams,
+            ["FaceFb\0\0"] = FbFaceTracking.SetFace1FbParams,
+            ["Face2Fb\0"] = FbFaceTracking.SetFace2FbParams,
             ["FacePico"] = PicoFaceTracking.SetFacePicoParams,
+            ["EyesHtc\0"] = HtcFaceTracking.SetEyesHtcParams,
+            ["LipHtc\0\0"] = HtcFaceTracking.SetLipHtcParams,
         };
 
         public override (bool SupportsEye, bool SupportsExpression) Supported => (true, true);

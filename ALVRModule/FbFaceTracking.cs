@@ -81,12 +81,12 @@ namespace ALVRModule
         Face2FbMax = 70,
     }
 
-    public class MetaFaceTracking
+    public class FbFaceTracking
     {
         private static void SetFaceFbParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            eye.Right.Openness = 1.0f - Math.Max(0, Math.Min(1, p[EyesClosedR] + p[EyesClosedR] * p[LidTightenerR]));
-            eye.Left.Openness = 1.0f - Math.Max(0, Math.Min(1, p[EyesClosedL] + p[EyesClosedL] * p[LidTightenerL]));
+            eye.Right.Openness = 1.0f - Math.Clamp(p[EyesClosedR] + p[EyesClosedR] * p[LidTightenerR], 0.0f, 1.0f);
+            eye.Left.Openness = 1.0f - Math.Clamp(p[EyesClosedL] + p[EyesClosedL] * p[LidTightenerL], 0.0f, 1.0f);
 
             #region Eyelids
 
