@@ -77,8 +77,8 @@ namespace ALVRModule
         {
             p.Read((int)EyesMax);
 
-            eye.Right.Openness = 1.0f - Math.Clamp(p[RightBlink] + p[RightBlink] * p[RightSqueeze], 0.0f, 1.0f);
-            eye.Left.Openness = 1.0f - Math.Clamp(p[LeftBlink] + p[LeftBlink] * p[LeftSqueeze], 0.0f, 1.0f);
+            eye.Right.Openness = 1.0f - p[RightBlink];
+            eye.Left.Openness = 1.0f - p[LeftBlink];
 
             eye.Right.Gaze.x = p[RightOut] - p[RightIn];
             eye.Right.Gaze.y = p[RightUp] - p[RightDown];
@@ -116,7 +116,7 @@ namespace ALVRModule
             
             #region Direct Jaw
 
-            w[U.JawOpen] = p[JawOpen] + p[MouthApeShape];
+            w[U.JawOpen] = p[JawOpen];
             w[U.JawLeft] = p[JawLeft];
             w[U.JawRight] = p[JawRight];
             w[U.JawForward] = p[JawForward];
@@ -126,13 +126,13 @@ namespace ALVRModule
 
             #region Direct Mouth and Lip
 
-            w[MouthUpperUpRight] = p[MouthUpperRight] - p[MouthUpperOverturn];
+            w[MouthUpperUpRight] = p[MouthUpperUpright];
             w[MouthUpperDeepenRight] = p[MouthUpperRight] - p[MouthUpperOverturn];
-            w[MouthUpperUpLeft] = p[MouthUpperLeft] - p[MouthUpperOverturn];
+            w[MouthUpperUpLeft] = p[MouthUpperUpleft];
             w[MouthUpperDeepenLeft] = p[MouthUpperLeft] - p[MouthUpperOverturn];
 
-            w[MouthLowerDownLeft] = p[MouthLowerLeft] - p[MouthLowerOverturn];
-            w[MouthLowerDownRight] = p[MouthLowerRight] - p[MouthLowerOverturn];
+            w[MouthLowerDownLeft] = p[MouthLowerDownleft];
+            w[MouthLowerDownRight] = p[MouthLowerDownright];
 
             w[LipPuckerUpperLeft] = p[MouthPout];
             w[LipPuckerLowerLeft] = p[MouthPout];
