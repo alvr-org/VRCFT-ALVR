@@ -12,11 +12,18 @@ namespace ALVRModule
             get; private set;
         }
 
-        public float this[Enum index]
+        public float this[object index]
         {
             get
             {
                 return Params?[Convert.ToInt32(index)] ?? 0;
+            }
+            set
+            {
+                if (Params == null)
+                    return;
+
+                Params[Convert.ToInt32(index)] = value;
             }
         }
 

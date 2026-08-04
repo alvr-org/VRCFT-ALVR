@@ -22,6 +22,8 @@ namespace ALVRModule
             ["FaceFb\0\0"] = FbFaceTracking.SetFace1FbParams,
             ["Face2Fb\0"] = FbFaceTracking.SetFace2FbParams,
             ["FacePico"] = PicoFaceTracking.SetFacePicoParams,
+            ["FacePhnx"] = PicoFaceTracking.SetFacePicoParams,
+            ["EyesPhnx"] = PhoenixEyeTracking.SetEyesPhoenixParams,
             ["EyesHtc\0"] = HtcFaceTracking.SetEyesHtcParams,
             ["LipHtc\0\0"] = HtcFaceTracking.SetLipHtcParams,
         };
@@ -51,6 +53,8 @@ namespace ALVRModule
             }
             catch (Exception)
             {
+                // This branch is non-blocking, so we let the thread sleep.
+                Thread.Sleep(100);
                 return;
             }
 

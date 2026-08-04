@@ -86,10 +86,7 @@ namespace ALVRModule
     {
         public static void SetFacePicoParams(FloatParams p, FloatWeightParams w, UnifiedEyeData eye)
         {
-            p.Read((int)FaceMax);
-
-            eye.Right.Openness = 1.0f - Math.Clamp(p[EyeBlinkR] + p[EyeBlinkR] * p[EyeSquintR], 0.0f, 1.0f);
-            eye.Left.Openness = 1.0f - Math.Clamp(p[EyeBlinkL] + p[EyeBlinkL] * p[EyeSquintL], 0.0f, 1.0f);
+            p.Read(52);
 
             #region Eye Expressions
 
@@ -124,11 +121,11 @@ namespace ALVRModule
 
             #region Jaw Exclusive Expressions
 
-            w[JawOpen] = p[JawShapeOpen];
+            w[JawOpen] = p[JawShapeOpen] - p[MouthClose];
+
             w[JawRight] = p[JawShapeRight];
             w[JawLeft] = p[JawShapeLeft];
             w[JawForward] = p[JawShapeForward];
-            w[MouthClosed] = p[MouthClose];
 
             #endregion
 
@@ -149,10 +146,10 @@ namespace ALVRModule
             w[LipPuckerLowerRight] = p[MouthPucker];
             w[LipPuckerLowerLeft] = p[MouthPucker];
 
-            w[MouthUpperUpRight] = Math.Max(0, p[MouthUpperUpR] - p[NoseSneerR]);
-            w[MouthUpperUpLeft] = Math.Max(0, p[MouthUpperUpL] - p[NoseSneerL]);
-            w[MouthUpperDeepenRight] = Math.Max(0, p[MouthUpperUpR] - p[NoseSneerR]);
-            w[MouthUpperDeepenLeft] = Math.Max(0, p[MouthUpperUpL] - p[NoseSneerL]);
+            w[MouthUpperUpRight] = p[MouthUpperUpR];
+            w[MouthUpperUpLeft] = p[MouthUpperUpL];
+            w[MouthUpperDeepenRight] = p[MouthUpperUpR];
+            w[MouthUpperDeepenLeft] = p[MouthUpperUpL];
 
             w[NoseSneerRight] = p[NoseSneerR];
             w[NoseSneerLeft] = p[NoseSneerL];
