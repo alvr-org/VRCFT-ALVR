@@ -24,6 +24,7 @@ namespace ALVRModule
             ["FacePico"] = PicoFaceTracking.SetFacePicoParams,
             ["EyesHtc\0"] = HtcFaceTracking.SetEyesHtcParams,
             ["LipHtc\0\0"] = HtcFaceTracking.SetLipHtcParams,
+            ["UniExpr\0"] = UnifiedExprTracking.SetUnifiedExprParams,
         };
 
         public override (bool SupportsEye, bool SupportsExpression) Supported => (true, true);
